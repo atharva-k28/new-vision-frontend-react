@@ -1,21 +1,23 @@
 import { useState } from "react";
-import "./App.css"; // 
+import "./App.css";
 
-type formdata = {
-  img_url: string;
-};
 
 const NewVision = () => {
-  const [formData, SetFormData] = useState<formdata>({ img_url: "" });
+  const [image,SetImage] = useState<File>();
   const [outputText, setOutputText] = useState("");
 
+  
+
   const request = async () => {
-    const response = await fetch("http://127.0.0.1:8000/process-url", {
+
+    if(!image)return;
+
+    const formData = new FormData;
+    formData.append("file",image);
+
+    const response = await fetch("http://127.0.0.1:8000/process-image", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
+      body: formData,
     });
     const res = await response.json();
     setOutputText(res.caption);
@@ -27,17 +29,19 @@ const NewVision = () => {
         <h2>Image URL Input</h2>
 
         <input
-          type="text"
-          placeholder="Enter image URL"
-          value={formData.img_url}
-          onChange={(e) =>
-            SetFormData({ ...formData, img_url: e.target.value })
+          type="file"
+          accept="image/*"
+          onChange={(e) =>{
+            if(e.target.files){
+              SetImage(e.target.files[0])
+            }
+          }
           }
         />
 
         <button onClick={request}>Submit</button>
 
-        {formData.img_url && (
+        {/* {formData.img_url && (
           <div className="preview">
             <h3>Preview:</h3>
             <img
@@ -45,7 +49,7 @@ const NewVision = () => {
               alt="Input Preview"
             />
           </div>
-        )}
+        )} */}
 
         {outputText && (
           <div className="output">
