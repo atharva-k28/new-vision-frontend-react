@@ -11,7 +11,9 @@ const CameraCapture = ({ setImage }: CameraProps) => {
   useEffect(() => {
     const livecamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {
+            facingMode: { ideal: "environment" } 
+          } });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
