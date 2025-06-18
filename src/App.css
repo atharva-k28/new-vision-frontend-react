@@ -8,6 +8,17 @@ body {
   min-height: 100vh;
 }
 
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; 
+}
+
+body {
+  background: linear-gradient(to bottom right, #e0f7fa, #f0f4ff);
+}
+
 .page-container {
   width: 100%;
   padding: 32px 16px;
@@ -17,6 +28,8 @@ body {
 }
 
 .form-container {
+  margin:auto;
+  padding: auto;
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.3);
