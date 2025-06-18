@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -28,7 +28,6 @@ const NewVision = () => {
 
       const res = await response.json();
       setOutputText(res.caption);
-      speak();
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -42,6 +41,14 @@ const NewVision = () => {
     window.speechSynthesis.speak(utterance)
 
   }
+
+  useEffect(()=>{
+    if(outputText){
+      speak();
+    }
+  },[outputText]);
+
+  
 
   return (
     <div className="page-container">
