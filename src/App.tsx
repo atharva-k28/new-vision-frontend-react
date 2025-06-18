@@ -1,61 +1,89 @@
 import { useState } from "react";
 import "./App.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const NewVision = () => {
-  const [image,SetImage] = useState<File>();
+  const [image, setImage] = useState<File | null>(null);
   const [outputText, setOutputText] = useState("");
-
-  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const request = async () => {
+    if (!image) return;
+    setLoading(true);
+    setError("");
+    setOutputText("");
 
-    if(!image)return;
+    try {
+      const formData = new FormData();
+      formData.append("file", image);
 
-    const formData = new FormData;
-    formData.append("file",image);
+      const response = await fetch(`${API_BASE_URL}/process-image`, {
+        method: "POST",
+        body: formData,
+      });
 
-    const response = await fetch("http://127.0.0.1:8000/process-image", {
-      method: "POST",
-      body: formData,
-    });
-    const res = await response.json();
-    setOutputText(res.caption);
+      if (!response.ok) throw new Error("Failed to fetch caption");
+
+      const res = await response.json();
+      setOutputText(res.caption);
+      speak();
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const speak = () =>{
+    const utterance = new SpeechSynthesisUtterance(outputText);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance)
+
+  }
 
   return (
     <div className="page-container">
       <div className="form-container">
-        <h2>Image URL Input</h2>
+        <h2>Image Caption Generator</h2>
 
         <input
           type="file"
           accept="image/*"
-          onChange={(e) =>{
-            if(e.target.files){
-              SetImage(e.target.files[0])
+          onChange={(e) => {
+            if (e.target.files?.[0]) {
+              setImage(e.target.files[0]);
+              setOutputText("");
+              setError("");
             }
-          }
-          }
+          }}
         />
 
-        <button onClick={request}>Submit</button>
-
-        {/* {formData.img_url && (
+        {image && (
           <div className="preview">
-            <h3>Preview:</h3>
             <img
-              src={formData.img_url}
-              alt="Input Preview"
+              src={URL.createObjectURL(image)}
+              alt="Preview"
+              className="preview-img"
             />
           </div>
-        )} */}
+        )}
+
+        <button onClick={request} disabled={loading || !image}>
+          {loading ? "Processing..." : "Submit"}
+        </button>
+
+        {error && <p className="error">{error}</p>}
 
         {outputText && (
+          <>
           <div className="output">
-            <h2>Output Caption:</h2>
+            <h3>Output Caption:</h3>
             <p>{outputText}</p>
           </div>
+          <button onClick={speak}>SPEAK</button>
+          </>
         )}
       </div>
     </div>
